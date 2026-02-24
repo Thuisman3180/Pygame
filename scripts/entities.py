@@ -143,6 +143,117 @@ class Enemy(PhysicsEntity):
             surf.blit(self.game.assets['gun'], (self.rect().centerx + 4 - offset[0], self.rect().centery - offset[1]))
 
 
+class Boss(PhysicsEntity):
+    def __init__(self, game, pos, size):
+        super().__init__(game, 'boss', pos, size)
+        self.walking = 0
+        self.hp = 8
+        self.max_hp =  8
+        self.shoot_cooldown = 0
+        self.hit_cooldown = 0
+        self.anim_offset = (-8, -9)
+
+    def update(self, tilemap, movement=(0, 0)):
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+        if self.hit_cooldown > 0:
+            self.hit_cooldown -= 1
+
+        # Boss actively walks toward the player
+        player_x = self.game.player.pos[0]
+        boss_x = self.pos[0]
+        dx = player_x - boss_x
+
+        # Face the player
+        if dx < 0:
+            self.flip = True
+        elif dx > 0:
+            self.flip = False
+
+        # Walk toward player if far enough away
+        if abs(dx) > 20:
+            walk_dir = -0.4 if self.flip else 0.4
+            if not (self.collisions['right'] or self.collisions['left']):
+                movement = (movement[0] + walk_dir, movement[1])
+
+        # Try to shoot periodically
+        if random.random() < 0.015:
+            self.try_shoot()
+
+        super().update(tilemap, movement=movement)
+
+        if movement[0] != 0:
+            self.set_action('run')
+        else:
+            self.set_action('idle')
+
+        # Check if player is dashing into boss
+        if abs(self.game.player.dashing) >= 50 and self.hit_cooldown <= 0:
+            if self.rect().colliderect(self.game.player.rect()):
+                self.hp -= 1
+                self.hit_cooldown = 30
+                self.game.screenshake = max(16, self.game.screenshake)
+                self.game.sfx['hit'].play()
+                for i in range(30):
+                    angle = random.random() * math.pi * 2
+                    speed = random.random() * 5
+                    self.game.sparks.append(Spark(self.rect().center, angle, 2 + random.random()))
+                    self.game.particles.append(Particle(self.game, 'particle', self.rect().center,
+                                                   velocity=[math.cos(angle + math.pi) * speed * 0.5,
+                                                             math.sin(angle + math.pi) * speed * 0.5],
+                                                   frame=random.randint(0, 7)))
+                if self.hp <= 0:
+                    self.game.sparks.append(Spark(self.rect().center, 0, 5 + random.random()))
+                    self.game.sparks.append(Spark(self.rect().center, math.pi, 5 + random.random()))
+                    return True
+
+    def try_shoot(self):
+        if self.shoot_cooldown <= 0:
+            player_pos = self.game.player.rect().center
+            boss_center = self.rect().center
+
+            dx = player_pos[0] - boss_center[0]
+            dy = player_pos[1] - boss_center[1]
+            distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance > 0 and distance < 200:
+                speed = 1.5
+                vx = (dx / distance) * speed
+                vy = (dy / distance) * speed
+
+                self.game.sfx['shoot'].play()
+                self.game.boss_projectiles.append([[boss_center[0], boss_center[1]], [vx, vy], 0])
+
+                self.flip = dx < 0
+
+                for i in range(4):
+                    self.game.sparks.append(Spark([boss_center[0], boss_center[1]], random.random() - 0.5 + (math.pi if vx < 0 else 0), 2 + random.random()))
+
+                self.shoot_cooldown = 90
+
+    def render(self, surf, offset=(0, 0)):
+        super().render(surf, offset=offset)
+
+        # Render gun rotated toward player
+        gun = self.game.assets['gun']
+        player_pos = self.game.player.rect().center
+        boss_center = self.rect().center
+
+        dx = player_pos[0] - boss_center[0]
+        dy = player_pos[1] - boss_center[1]
+        angle = math.degrees(math.atan2(-dy, dx))
+
+        gun_scaled = pygame.transform.scale2x(gun)
+        if dx < 0:
+            gun_scaled = pygame.transform.flip(gun_scaled, True, False)
+            rotated_gun = pygame.transform.rotate(gun_scaled, -angle + 180)
+        else:
+            rotated_gun = pygame.transform.rotate(gun_scaled, angle)
+
+        gun_pos = (boss_center[0] - offset[0] - rotated_gun.get_width() // 2,
+                   boss_center[1] - offset[1] - rotated_gun.get_height() // 2)
+        surf.blit(rotated_gun, gun_pos)
+
 class Player(PhysicsEntity):
     def __init__(self, game, pos, size):
         super().__init__(game, 'player', pos, size)

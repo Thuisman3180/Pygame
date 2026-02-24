@@ -14,7 +14,7 @@ AUTOTILE_MAP = {
     tuple(sorted([(1, 0), (-1, 0), (0, 1), (0, -1)])): 8,
 }
 
-NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1), (0, 1), (1, 1)]
+NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1), (0, 1), (1, 1), (-1, 2), (0, 2), (1, 2)]
 PHYSICS_TILES = {'grass', 'stone'}
 AUTOTILE_TYPES = {'grass', 'stone'}
 
