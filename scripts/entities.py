@@ -229,7 +229,7 @@ class Boss(PhysicsEntity):
     def render(self, surf, offset=(0, 0)):
         super().render(surf, offset=offset)
 
-        # Render gun rotated toward player
+
         gun = self.game.assets['gun']
         player_pos = self.game.player.rect().center
         boss_center = self.rect().center

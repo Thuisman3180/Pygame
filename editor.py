@@ -47,7 +47,7 @@ class Editor:
         self.level_data = LevelData(tile_size=16)
         self.history = History()
 
-        # Try loading existing map
+
         self._try_load_map()
 
         dummy = pygame.Rect(0, 0, 1, 1)
@@ -61,11 +61,11 @@ class Editor:
         self.console_panel = ConsolePanel(dummy)
         self.canvas = Canvas(dummy, self.level_data, self.history, self.assets)
 
-        # Wire canvas callbacks
+
         self.canvas.on_select = self._on_canvas_select
         self.canvas.on_log = self._on_log
 
-        # Initial layout
+
         self._layout()
 
         self._on_log("Editor ready. WASD=scroll, Wheel=zoom, G=grid snap, T=autotile")
