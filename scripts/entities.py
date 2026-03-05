@@ -159,24 +159,20 @@ class Boss(PhysicsEntity):
         if self.hit_cooldown > 0:
             self.hit_cooldown -= 1
 
-        # Boss actively walks toward the player
         player_x = self.game.player.pos[0]
         boss_x = self.pos[0]
         dx = player_x - boss_x
 
-        # Face the player
         if dx < 0:
             self.flip = True
         elif dx > 0:
             self.flip = False
 
-        # Walk toward player if far enough away
         if abs(dx) > 20:
             walk_dir = -0.4 if self.flip else 0.4
             if not (self.collisions['right'] or self.collisions['left']):
                 movement = (movement[0] + walk_dir, movement[1])
 
-        # Try to shoot periodically
         if random.random() < 0.015:
             self.try_shoot()
 
@@ -187,7 +183,6 @@ class Boss(PhysicsEntity):
         else:
             self.set_action('idle')
 
-        # Check if player is dashing into boss
         if abs(self.game.player.dashing) >= 50 and self.hit_cooldown <= 0:
             if self.rect().colliderect(self.game.player.rect()):
                 self.hp -= 1

@@ -16,7 +16,7 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        pygame.display.set_caption("Arcane Ascension")
+        pygame.display.set_caption("Ninja Game")
 
         self.screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
         self.display = pygame.surface.Surface((320, 240), pygame.SRCALPHA)
@@ -75,7 +75,7 @@ class Game:
 
         self.tilemap = Tilemap(self, tile_size=16)
 
-        self.level = 0
+        self.level = 3
 
         self.load_level(self.level)
         self.screenshake = 0
@@ -139,13 +139,12 @@ class Game:
             self.clouds.update()
             self.clouds.render(self.display_2, offset=(0, 0))
 
-            # Darken overlay
+
             overlay = pygame.Surface((320, 240), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 120))
             self.display_2.blit(overlay, (0, 0))
 
             if show_controls:
-                # Controls screen
                 ctrl_title = title_font.render('Controls', True, (255, 255, 255))
                 self.display_2.blit(ctrl_title, (160 - ctrl_title.get_width() // 2, 30))
 
@@ -166,17 +165,16 @@ class Game:
                 back_text.set_alpha(alpha)
                 self.display_2.blit(back_text, (160 - back_text.get_width() // 2, 210))
             else:
-                # Title with glow effect
+
                 title_text = title_font.render('Arcane Ascension', True, (255, 255, 255))
-                # Shadow
+
                 title_shadow = title_font.render('Arcane Ascension', True, (50, 50, 80))
                 self.display_2.blit(title_shadow, (160 - title_shadow.get_width() // 2 + 2, 52))
                 self.display_2.blit(title_text, (160 - title_text.get_width() // 2, 50))
 
-                # Menu options
+
                 for i, option in enumerate(menu_options):
                     if i == selected:
-                        # Pulsing highlight color
                         pulse = int(200 + 55 * math.sin(menu_tick * 0.08))
                         color = (pulse, pulse, 255)
                         prefix = '> '
@@ -253,7 +251,6 @@ class Game:
             if level_clear:
                 if self.level == 3 and self.boss_dead:
                     self.boss_win_timer += 1
-                    # Circle-close transition during win timer
                     if self.boss_win_timer > 60:
                         transition_progress = min(30, self.boss_win_timer - 60)
                         transition_surf = pygame.Surface(self.display.get_size())
@@ -432,7 +429,6 @@ class Game:
 
             self.display_2.blit(self.display, (0, 0))
 
-            # Boss HP bar
             if self.boss and not self.boss_dead and self.level == 3:
                 bar_width = 100
                 bar_height = 6
@@ -465,12 +461,10 @@ class Game:
 
         while self.paused:
             pause_tick += 1
-            # Keep rendering the game underneath
             overlay = pygame.Surface((320, 240), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 140))
             self.display_2.blit(overlay, (0, 0))
 
-            # Pause title
             title = pause_font.render('PAUSED', True, (255, 255, 255))
             self.display_2.blit(title, (160 - title.get_width() // 2, 60))
 
@@ -548,7 +542,6 @@ class Game:
             overlay.fill((0, 0, 0, 140))
             self.display_2.blit(overlay, (0, 0))
 
-            # Circle-open transition at start of victory screen
             if win_tick < fade_in_duration:
                 transition_surf = pygame.Surface((320, 240))
                 radius = int(win_tick * (320 / fade_in_duration))
@@ -556,7 +549,6 @@ class Game:
                 transition_surf.set_colorkey((255, 255, 255))
                 self.display_2.blit(transition_surf, (0, 0))
 
-            # Victory title
             title = title_font.render('VICTORY!', True, (255, 215, 0))
             shadow = title_font.render('VICTORY!', True, (100, 80, 0))
             self.display_2.blit(shadow, (160 - shadow.get_width() // 2 + 2, 62))
@@ -565,7 +557,6 @@ class Game:
             sub = sub_font.render('You defeated the boss!', True, (220, 220, 220))
             self.display_2.blit(sub, (160 - sub.get_width() // 2, 100))
 
-            # Pulsing restart hint
             alpha = int(150 + 105 * math.sin(win_tick * 0.05))
             hint = small_font.render('Press ENTER to return to menu', True, (180, 180, 180))
             hint.set_alpha(alpha)
